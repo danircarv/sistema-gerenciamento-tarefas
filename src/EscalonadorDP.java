@@ -3,8 +3,13 @@ import java.util.ArrayList;
 
 public class EscalonadorDP {
 
-    public Resultado escalonar(List<Tarefa> tarefas, int tempoTotalDisponivel) {
+    public Resultado escalonar(List<Tarefa> tarefasOriginal, int tempoTotalDisponivel) {
         Resultado resultado = new Resultado("Programação Dinâmica (0/1 Knapsack Adaptado)");
+
+        // Create a copy and sort it
+        List<Tarefa> tarefas = new ArrayList<>(tarefasOriginal);
+        quickSort(tarefas, 0, tarefas.size() - 1);
+
         int n = tarefas.size();
         int T = tempoTotalDisponivel;
 
@@ -57,5 +62,35 @@ public class EscalonadorDP {
         // This acts as a double-check against the DP table value (dp[n][T]).
 
         return resultado;
+    }
+
+    private void quickSort(List<Tarefa> tarefas, int low, int high) {
+        if (low < high) {
+            int pi = partition(tarefas, low, high);
+            quickSort(tarefas, low, pi - 1);
+            quickSort(tarefas, pi + 1, high);
+        }
+    }
+
+    private int partition(List<Tarefa> tarefas, int low, int high) {
+        Tarefa pivot = tarefas.get(high);
+        double pivotDensity = pivot.getDensidade();
+        int i = (low - 1);
+
+        for (int j = low; j < high; j++) {
+            // Descending order: if current element is greater than pivot
+            if (tarefas.get(j).getDensidade() > pivotDensity) {
+                i++;
+                swap(tarefas, i, j);
+            }
+        }
+        swap(tarefas, i + 1, high);
+        return i + 1;
+    }
+
+    private void swap(List<Tarefa> tarefas, int i, int j) {
+        Tarefa temp = tarefas.get(i);
+        tarefas.set(i, tarefas.get(j));
+        tarefas.set(j, temp);
     }
 }
