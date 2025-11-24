@@ -55,20 +55,22 @@ Este documento apresenta uma análise detalhada do problema de gerenciamento de 
 \tableofcontents
 \newpage
 
-\section{Definição do Problema}
+\section{Definição do Problema e Contextualização}
 
-\subsection{Contextualização}
-O gerenciamento de tarefas em sistemas computacionais modernos é um desafio crítico. Um centro de processamento de dados recebe continuamente diversas tarefas, cada uma caracterizada por:
+\subsection{Cenário: Centro de Processamento de Dados}
+O sistema foi projetado para operar em um Centro de Processamento de Dados (CPD) com recursos computacionais finitos. O problema central é o **agendamento de tarefas** (Task Scheduling) sob restrição de tempo. Diferente de um sistema operacional de propósito geral que busca justiça (fairness), nosso objetivo é maximizar o **valor entregue** ao negócio.
+
+Cada tarefa $i$ é definida pela tupla $(t_i, v_i, d_i)$, onde:
 \begin{itemize}
-    \item \textbf{Tempo de Execução ($t_i$)}: Recurso temporal necessário para completar a tarefa.
-    \item \textbf{Prioridade ($v_i$)}: Valor ou importância associada à conclusão da tarefa.
-    \item \textbf{Prazo ($d_i$)}: Momento limite ou fator de urgência.
+    \item $t_i$ (Tempo): Custo de processamento.
+    \item $v_i$ (Prioridade): Valor agregado pela conclusão da tarefa.
+    \item $d_i$ (Prazo): Fator de urgência que influencia a prioridade dinâmica.
 \end{itemize}
 
-Como os recursos (tempo de processamento disponível $T$) são limitados, torna-se impossível executar todas as tarefas simultaneamente. O problema consiste em selecionar um subconjunto de tarefas $S$ tal que a soma dos tempos não exceda $T$ e a soma das prioridades seja maximizada.
+O problema é selecionar um subconjunto $S$ de tarefas tal que $\sum_{i \in S} t_i \leq T_{\text{total}}$ e $\sum_{i \in S} v_i$ seja máximo.
 
-\subsection{O Desafio}
-O desafio central reside em modelar uma estratégia de escalonamento que seja eficiente computacionalmente, mas que também evite decisões míopes que comprometam o desempenho global. A escolha entre uma resposta rápida (mas potencialmente subótima) e uma resposta ótima (mas computacionalmente mais custosa) é o cerne desta análise.
+\subsection{O Dilema da Decisão}
+O sistema deve decidir entre uma abordagem de resposta imediata (Guloso) ou uma garantia de otimalidade (Programação Dinâmica). A escolha impacta diretamente a eficiência operacional do CPD: algoritmos rápidos liberam o escalonador para outras funções, mas decisões subótimas desperdiçam ciclos de CPU com tarefas de menor valor.
 
 \section{Implementação e Metodologia}
 
@@ -85,12 +87,17 @@ Optamos pelo Quick Sort em detrimento de algoritmos mais simples como Bubble Sor
 O sistema foi desenvolvido com uma interface baseada em terminal (CLI - Command Line Interface).
 \textbf{Justificativa:} A escolha por uma interface textual permite foco total na lógica algorítmica e na visualização clara dos dados de saída (tabelas de comparação), sem o overhead de processamento gráfico. A saída é organizada e explicativa, facilitando a análise imediata dos resultados pelo operador.
 
-\section{Abordagem Proposta e Justificativa}
+\section{Estratégias Algorítmicas Implementadas}
 
-Nosso sistema implementa e compara duas estratégias, mas defendemos a adoção do algoritmo baseado no \textbf{Problema da Mochila (Knapsack Problem)} em detrimento da abordagem puramente Gulosa.
+\subsection{Abordagem Gulosa: A Heurística da Densidade}
+Para o algoritmo guloso, não basta ordenar por valor ou por tempo. Desenvolvemos uma métrica composta denominada **Densidade**, que equilibra valor, custo e urgência:
 
-\subsection{Por que Knapsack (Programação Dinâmica)?}
-Embora o algoritmo Guloso seja intuitivo e extremamente rápido, ele sofre de uma falha fundamental: a incapacidade de "enxergar o futuro". A abordagem de Programação Dinâmica (DP) garante matematicamente a solução ótima global, avaliando implicitamente todas as combinações viáveis.
+$$ \text{Densidade}_i = \frac{v_i}{t_i \times (d_i + 1)} $$
+
+Esta fórmula prioriza tarefas que entregam muito valor rapidamente e que possuem prazos apertados. A implementação utiliza o \textbf{Quick Sort} para ordenar as tarefas decrescentemente por esta densidade e, em seguida, itera linearmente selecionando as que cabem no tempo restante.
+
+\subsection{Abordagem Exata: Programação Dinâmica (Knapsack)}
+Modelamos o problema como uma variação do **Problema da Mochila 0/1**, onde a "capacidade da mochila" é o tempo total disponível $T$. A Programação Dinâmica (DP) constrói uma solução passo-a-passo, garantindo que nenhuma combinação de tarefas que resulte em um valor total maior seja ignorada. Ao contrário do guloso, o DP consegue "ver o futuro" e preencher lacunas de tempo com combinações perfeitas de tarefas menores.
 
 \section{Documento Analítico}
 
@@ -104,19 +111,53 @@ $$
 dp[i][w] = \max(dp[i-1][w], v_i + dp[i-1][w - w_i]) \quad \text{se } w_i \leq w
 $$
 
-\subsection{Análise Assintótica de Complexidade}
+\section{Análise Assintótica e Implementação}
 
-\subsubsection{1. Escalonador Guloso}
-\begin{itemize}
-    \item \textbf{Tempo}: $O(n \log n)$ (Ordenação Quick Sort) + $O(n)$ (Seleção) = $O(n \log n)$.
-    \item \textbf{Espaço}: $O(n)$ (Lista e Pilha de Recursão).
-\end{itemize}
+A seguir, detalhamos a complexidade teórica corroborada por trechos do código fonte desenvolvido.
 
-\subsubsection{2. Escalonador Knapsack (DP)}
-\begin{itemize}
-    \item \textbf{Tempo}: $O(n \cdot W)$. Preenchimento da tabela $n \times W$.
-    \item \textbf{Espaço}: $O(n \cdot W)$. Armazenamento da tabela.
-\end{itemize}
+\subsection{Escalonador Guloso}
+A complexidade é dominada pela ordenação. Utilizamos o Quick Sort, que possui caso médio $O(n \log n)$. A seleção subsequente é linear $O(n)$.
+
+\begin{lstlisting}[language=Java, caption=Partition do Quick Sort (Ordenação por Densidade)]
+private int partition(List<Tarefa> tarefas, int low, int high) {
+    Tarefa pivot = tarefas.get(high);
+    double pivotDensity = pivot.getDensidade();
+    int i = (low - 1);
+    for (int j = low; j < high; j++) {
+        // Ordena decrescente pela densidade calculada
+        if (tarefas.get(j).getDensidade() > pivotDensity) {
+            i++;
+            swap(tarefas, i, j);
+        }
+    }
+    swap(tarefas, i + 1, high);
+    return i + 1;
+}
+\end{lstlisting}
+
+\subsection{Escalonador DP (Knapsack)}
+A complexidade é pseudo-polinomial $O(n \cdot W)$, onde $n$ é o número de tarefas e $W$ é o tempo total disponível. Isso ocorre devido à estrutura de laços aninhados necessária para preencher a tabela de memorização.
+
+\begin{lstlisting}[language=Java, caption=Núcleo da Programação Dinâmica]
+// n = tarefas.size(), T = tempoTotalDisponivel
+for (int i = 1; i <= n; i++) {
+    int tempoTarefa = tarefas.get(i-1).getTempo();
+    int valorTarefa = tarefas.get(i-1).getPrioridade();
+    
+    for (int t = 1; t <= T; t++) {
+        // Opcao 1: Nao incluir
+        dp[i][t] = dp[i-1][t];
+        
+        // Opcao 2: Incluir se couber
+        if (tempoTarefa <= t) {
+            int valorCom = dp[i-1][t-tempoTarefa] + valorTarefa;
+            if (valorCom > dp[i][t]) {
+                dp[i][t] = valorCom;
+            }
+        }
+    }
+}
+\end{lstlisting}
 
 \section{Análise de Desempenho Experimental}
 
@@ -142,8 +183,15 @@ Realizamos testes empíricos comparando as duas abordagens.
 \end{tabular}
 \end{table}
 
-\subsection{Discussão}
-O DP superou o Guloso em cenários críticos (Cenário 2 e 4), provando sua robustez. O tempo de execução do DP, embora maior, manteve-se na ordem de frações de milissegundo, o que é perfeitamente aceitável para a garantia de otimalidade. A ordenação Quick Sort manual comportou-se de forma estável e eficiente.
+\subsection{Consistência Teórica vs. Empírica}
+Os dados da Tabela \ref{tab:resultados} confirmam as expectativas teóricas:
+
+\begin{itemize}
+    \item \textbf{Guloso ($O(n \log n)$)}: O tempo de execução manteve-se extremamente baixo e estável ($\approx 0.05$ms a $0.16$ms), pois depende apenas do número de tarefas ($n$), que é pequeno nos testes.
+    \item \textbf{DP ($O(n \cdot W)$)}: O tempo de execução aumentou visivelmente no Cenário 4 ($\approx 0.45$ms). Isso ocorre porque o limite de tempo ($W$) aumentou para 100, forçando a matriz $dp$ a ser maior ($n \times 100$) e exigindo mais iterações do laço interno.
+\end{itemize}
+
+A "falha" do Guloso no Cenário 2 (Valor 11 vs 20 do DP) ilustra perfeitamente a limitação teórica da heurística: ao escolher uma tarefa densa mas que consome muito tempo, ele bloqueou a inserção de múltiplas tarefas menores que, somadas, valeriam mais. O DP, explorando todas as combinações na matriz, evitou essa armadilha.
 
 \section{Análise Crítica Final}
 
