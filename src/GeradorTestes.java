@@ -31,7 +31,7 @@ public class GeradorTestes {
 
     public static List<Tarefa> getCasoAleatorio(int quantidade, int maxTempo, int maxPrioridade) {
         List<Tarefa> tarefas = new ArrayList<>();
-        Random rand = new Random(42); // Seed for reproducibility
+        Random rand = new Random(42); // Semente para reprodutibilidade
         for (int i = 1; i <= quantidade; i++) {
             int tempo = rand.nextInt(maxTempo) + 1;
             int prioridade = rand.nextInt(maxPrioridade) + 1;

@@ -6,10 +6,10 @@ public class EscalonadorGuloso {
     public Resultado escalonar(List<Tarefa> tarefas, int tempoTotalDisponivel) {
         Resultado resultado = new Resultado("Algoritmo Guloso (Weighted Job Scheduling)");
 
-        // Create a copy to avoid modifying the original list
+        // Cria uma cópia para evitar modificar a lista original
         List<Tarefa> tarefasOrdenadas = new ArrayList<>(tarefas);
 
-        // Sort by density (descending) using Quick Sort
+        // Ordena por densidade (decrescente) usando Quick Sort
         quickSort(tarefasOrdenadas, 0, tarefasOrdenadas.size() - 1);
 
         int tempoDecorrido = 0;
@@ -38,7 +38,7 @@ public class EscalonadorGuloso {
         int i = (low - 1);
 
         for (int j = low; j < high; j++) {
-            // Descending order: if current element is greater than pivot
+            // Ordem decrescente: se o elemento atual for maior que o pivô
             if (tarefas.get(j).getDensidade() > pivotDensity) {
                 i++;
                 swap(tarefas, i, j);

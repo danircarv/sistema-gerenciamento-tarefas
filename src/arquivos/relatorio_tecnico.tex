@@ -1,0 +1,162 @@
+\documentclass[a4paper,12pt]{article}
+
+% Pacotes para suporte a XeLaTeX e formatação
+\usepackage{fontspec}
+\usepackage{polyglossia}
+\setmainlanguage{portuguese}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{geometry}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\geometry{left=3cm,right=2cm,top=3cm,bottom=2cm}
+
+% Configuração de código
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegray},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+\lstset{style=mystyle}
+
+\title{\textbf{Relatório Técnico: Otimização de Escalonamento de Tarefas em Sistemas Computacionais}}
+\author{Sistema de Gerenciamento de Tarefas}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Este documento apresenta uma análise detalhada do problema de gerenciamento de tarefas em sistemas computacionais com recursos limitados. Comparamos duas abordagens algorítmicas: uma heurística gulosa (\textit{Weighted Job Scheduling}) e uma solução exata baseada em Programação Dinâmica (\textit{0/1 Knapsack Problem}). O projeto destaca-se pela implementação manual de todos os algoritmos, incluindo o método de ordenação \textit{Quick Sort}, e pela análise crítica da otimização de desempenho.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+\section{Definição do Problema}
+
+\subsection{Contextualização}
+O gerenciamento de tarefas em sistemas computacionais modernos é um desafio crítico. Um centro de processamento de dados recebe continuamente diversas tarefas, cada uma caracterizada por:
+\begin{itemize}
+    \item \textbf{Tempo de Execução ($t_i$)}: Recurso temporal necessário para completar a tarefa.
+    \item \textbf{Prioridade ($v_i$)}: Valor ou importância associada à conclusão da tarefa.
+    \item \textbf{Prazo ($d_i$)}: Momento limite ou fator de urgência.
+\end{itemize}
+
+Como os recursos (tempo de processamento disponível $T$) são limitados, torna-se impossível executar todas as tarefas simultaneamente. O problema consiste em selecionar um subconjunto de tarefas $S$ tal que a soma dos tempos não exceda $T$ e a soma das prioridades seja maximizada.
+
+\subsection{O Desafio}
+O desafio central reside em modelar uma estratégia de escalonamento que seja eficiente computacionalmente, mas que também evite decisões míopes que comprometam o desempenho global. A escolha entre uma resposta rápida (mas potencialmente subótima) e uma resposta ótima (mas computacionalmente mais custosa) é o cerne desta análise.
+
+\section{Implementação e Metodologia}
+
+\subsection{Implementação Manual de Algoritmos}
+Em conformidade com os requisitos do projeto, \textbf{todos os algoritmos principais foram implementados manualmente}, sem o uso de bibliotecas de otimização ou funções de ordenação nativas (como \texttt{Collections.sort}). Isso demonstra o domínio sobre a lógica algorítmica e permite um controle refinado sobre o comportamento do sistema.
+
+\subsection{Método de Ordenação: Quick Sort}
+Para a etapa de pré-processamento (essencial para o algoritmo Guloso e organizacional para o DP), implementamos o algoritmo \textbf{Quick Sort}.
+
+\textbf{Justificativa da Escolha:}
+Optamos pelo Quick Sort em detrimento de algoritmos mais simples como Bubble Sort ou Insertion Sort ($O(n^2)$) devido à sua eficiência média de $O(n \log n)$. Em um sistema de escalonamento real, onde o número de tarefas pode ser grande, a eficiência da ordenação é crucial para não se tornar um gargalo antes mesmo do processo de seleção começar. O critério de ordenação foi a \textbf{Densidade} ($\frac{\text{Prioridade}}{\text{Tempo} \times (\text{Prazo}+1)}$), ordenando as tarefas da mais "lucrativa" para a menos lucrativa.
+
+\subsection{Interface Humano-Computador (IHC)}
+O sistema foi desenvolvido com uma interface baseada em terminal (CLI - Command Line Interface).
+\textbf{Justificativa:} A escolha por uma interface textual permite foco total na lógica algorítmica e na visualização clara dos dados de saída (tabelas de comparação), sem o overhead de processamento gráfico. A saída é organizada e explicativa, facilitando a análise imediata dos resultados pelo operador.
+
+\section{Abordagem Proposta e Justificativa}
+
+Nosso sistema implementa e compara duas estratégias, mas defendemos a adoção do algoritmo baseado no \textbf{Problema da Mochila (Knapsack Problem)} em detrimento da abordagem puramente Gulosa.
+
+\subsection{Por que Knapsack (Programação Dinâmica)?}
+Embora o algoritmo Guloso seja intuitivo e extremamente rápido, ele sofre de uma falha fundamental: a incapacidade de "enxergar o futuro". A abordagem de Programação Dinâmica (DP) garante matematicamente a solução ótima global, avaliando implicitamente todas as combinações viáveis.
+
+\section{Documento Analítico}
+
+\subsection{Formulação do Problema}
+Seja um conjunto de $n$ tarefas, onde cada tarefa $i$ tem um peso $w_i$ (tempo) e um valor $v_i$ (prioridade). Seja $W$ a capacidade total.
+Queremos maximizar $\sum v_i$ sujeito a $\sum w_i \leq W$.
+
+\subsection{Modelo de Solução (Programação Dinâmica)}
+Definimos $dp[i][w]$ como o valor máximo considerando as primeiras $i$ tarefas com capacidade $w$.
+$$
+dp[i][w] = \max(dp[i-1][w], v_i + dp[i-1][w - w_i]) \quad \text{se } w_i \leq w
+$$
+
+\subsection{Análise Assintótica de Complexidade}
+
+\subsubsection{1. Escalonador Guloso}
+\begin{itemize}
+    \item \textbf{Tempo}: $O(n \log n)$ (Ordenação Quick Sort) + $O(n)$ (Seleção) = $O(n \log n)$.
+    \item \textbf{Espaço}: $O(n)$ (Lista e Pilha de Recursão).
+\end{itemize}
+
+\subsubsection{2. Escalonador Knapsack (DP)}
+\begin{itemize}
+    \item \textbf{Tempo}: $O(n \cdot W)$. Preenchimento da tabela $n \times W$.
+    \item \textbf{Espaço}: $O(n \cdot W)$. Armazenamento da tabela.
+\end{itemize}
+
+\section{Análise de Desempenho Experimental}
+
+Realizamos testes empíricos comparando as duas abordagens.
+
+\subsection{Resultados Obtidos}
+
+\begin{table}[H]
+\centering
+\caption{Comparativo de Valor Total e Tempo de Execução}
+\label{tab:resultados}
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+\textbf{Cenário} & \textbf{Algoritmo} & \textbf{Valor Total} & \textbf{Tempo Usado} & \textbf{Execução (ms)} \\ \midrule
+1. Favorável & Guloso & 37 & 10 & $\approx 0.15$ \\
+(Limite: 10) & DP & 37 & 10 & $\approx 0.20$ \\ \midrule
+2. Guloso Falha & Guloso & 11 & 2 & $\approx 0.05$ \\
+(Limite: 6) & \textbf{DP} & \textbf{20} & 5 & $\approx 0.10$ \\ \midrule
+3. Idênticas & Guloso & 60 & 30 & $\approx 0.08$ \\
+(Limite: 30) & DP & 60 & 30 & $\approx 0.15$ \\ \midrule
+4. Aleatório & Guloso & 335 & 98 & $\approx 0.16$ \\
+(Limite: 100) & \textbf{DP} & \textbf{352} & 100 & $\approx 0.45$ \\ \bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Discussão}
+O DP superou o Guloso em cenários críticos (Cenário 2 e 4), provando sua robustez. O tempo de execução do DP, embora maior, manteve-se na ordem de frações de milissegundo, o que é perfeitamente aceitável para a garantia de otimalidade. A ordenação Quick Sort manual comportou-se de forma estável e eficiente.
+
+\section{Análise Crítica Final}
+
+\subsection{Adequação da Abordagem}
+\textbf{Por que a abordagem escolhida foi a ideal?}
+A escolha pela Programação Dinâmica foi ideal porque, no contexto de gerenciamento de tarefas críticas, a perda de valor (prioridade) é inaceitável. O algoritmo Guloso, apesar de rápido, falhou em maximizar o uso dos recursos em cenários de "mochila cheia", deixando lacunas de tempo que poderiam ser preenchidas por tarefas mais valiosas. O DP preencheu essas lacunas perfeitamente.
+
+\subsection{Metodologia e Trabalho em Equipe}
+\textbf{Como o trabalho em equipe e a metodologia ágil influenciaram?}
+O desenvolvimento seguiu uma abordagem incremental. Inicialmente, focamos na implementação da estrutura básica (`Tarefa`) e do algoritmo Guloso para ter um MVP (Minimum Viable Product). Em seguida, implementamos o DP para comparação. A divisão clara de responsabilidades (implementação de algoritmos vs. infraestrutura de testes) e o uso de testes automatizados (`Comparador`) permitiram identificar rapidamente as falhas do algoritmo Guloso, guiando a decisão final de recomendar o DP.
+
+\section{Conclusão}
+
+A implementação do algoritmo \textit{Knapsack} via Programação Dinâmica, suportada por uma ordenação eficiente \textit{Quick Sort}, provou ser a solução superior. O sistema atende a todos os requisitos de otimização, robustez e implementação manual, garantindo o melhor desempenho possível para o centro de processamento de dados.
+
+\end{document}

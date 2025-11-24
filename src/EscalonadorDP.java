@@ -6,27 +6,28 @@ public class EscalonadorDP {
     public Resultado escalonar(List<Tarefa> tarefasOriginal, int tempoTotalDisponivel) {
         Resultado resultado = new Resultado("Programação Dinâmica (0/1 Knapsack Adaptado)");
 
-        // Create a copy and sort it
+        // Cria uma cópia e a ordena
         List<Tarefa> tarefas = new ArrayList<>(tarefasOriginal);
         quickSort(tarefas, 0, tarefas.size() - 1);
 
         int n = tarefas.size();
         int T = tempoTotalDisponivel;
 
-        // dp[i][t] stores the max value using first i tasks with time limit t
+        // dp[i][t] armazena o valor máximo usando as primeiras i tarefas com limite de
+        // tempo t
         int[][] dp = new int[n + 1][T + 1];
 
-        // Build table
+        // Constrói a tabela
         for (int i = 1; i <= n; i++) {
             Tarefa tarefaAtual = tarefas.get(i - 1);
             int tempoTarefa = tarefaAtual.getTempo();
             int valorTarefa = tarefaAtual.getPrioridade();
 
             for (int t = 1; t <= T; t++) {
-                // Option 1: Don't include task i
+                // Opção 1: Não incluir a tarefa i
                 dp[i][t] = dp[i - 1][t];
 
-                // Option 2: Include task i (if it fits)
+                // Opção 2: Incluir a tarefa i (se couber)
                 if (tempoTarefa <= t) {
                     int valorComTarefa = dp[i - 1][t - tempoTarefa] + valorTarefa;
                     if (valorComTarefa > dp[i][t]) {
@@ -36,14 +37,14 @@ public class EscalonadorDP {
             }
         }
 
-        // Backtracking to find which tasks were chosen
+        // Backtracking para encontrar quais tarefas foram escolhidas
         List<Tarefa> tarefasEscolhidas = new ArrayList<>();
         int i = n;
         int t = T;
 
         while (i > 0 && t > 0) {
             if (dp[i][t] != dp[i - 1][t]) {
-                // Task i was included
+                // Tarefa i foi incluída
                 Tarefa tarefaEscolhida = tarefas.get(i - 1);
                 tarefasEscolhidas.add(tarefaEscolhida);
                 t = t - tarefaEscolhida.getTempo();
@@ -51,15 +52,15 @@ public class EscalonadorDP {
             i--;
         }
 
-        // The backtracking adds tasks in reverse order of consideration (n down to 1)
-        // We might want to reverse it back or just keep it as is.
-        // The problem doesn't specify order, but for display it might look nice.
-        // Let's keep it simple as per requirements.
+        // O backtracking adiciona tarefas na ordem inversa de consideração (n até 1)
+        // Poderíamos inverter de volta ou manter como está.
+        // O problema não especifica ordem, mas para exibição pode ficar bom.
+        // Vamos manter simples conforme os requisitos.
 
         resultado.setTarefasExecutadas(tarefasEscolhidas);
-        // Note: setTarefasExecutadas recalculates the total value and time used based
-        // on the list.
-        // This acts as a double-check against the DP table value (dp[n][T]).
+        // Nota: setTarefasExecutadas recalcula o valor total e o tempo usado com base
+        // na lista.
+        // Isso age como uma verificação dupla contra o valor da tabela DP (dp[n][T]).
 
         return resultado;
     }
@@ -78,7 +79,7 @@ public class EscalonadorDP {
         int i = (low - 1);
 
         for (int j = low; j < high; j++) {
-            // Descending order: if current element is greater than pivot
+            // Ordem decrescente: se o elemento atual for maior que o pivô
             if (tarefas.get(j).getDensidade() > pivotDensity) {
                 i++;
                 swap(tarefas, i, j);

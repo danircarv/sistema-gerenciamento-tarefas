@@ -5,7 +5,7 @@ import java.util.Scanner;
 public class Main {
 
     private static List<Tarefa> tarefas = new ArrayList<>();
-    private static int tempoTotalDisponivel = 100; // Default value
+    private static int tempoTotalDisponivel = 100; // Valor padrão
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
@@ -121,10 +121,11 @@ public class Main {
     }
 
     private static void listarTarefasResultado(Resultado res) {
-        // Accessing private list via reflection or just trusting the print method?
-        // Resultado has exibirRelatorio, let's use that or just print summary.
-        // But the user might want to see WHICH tasks were chosen.
-        // Resultado.exibirRelatorio() prints to stdout.
+        // Acessando lista privada via reflection ou apenas confiando no método de
+        // impressão?
+        // Resultado tem exibirRelatorio, vamos usar isso ou apenas imprimir o resumo.
+        // Mas o usuário pode querer ver QUAIS tarefas foram escolhidas.
+        // Resultado.exibirRelatorio() imprime no stdout.
         res.exibirRelatorio();
     }
 

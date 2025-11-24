@@ -26,7 +26,7 @@ public class Resultado {
 
     public void setTarefasExecutadas(List<Tarefa> tarefas) {
         this.tarefasExecutadas = tarefas;
-        // Recalculate totals to ensure consistency
+        // Recalcula totais para garantir consistência
         this.valorTotal = 0;
         this.tempoUsado = 0;
         for (Tarefa t : tarefas) {
@@ -34,7 +34,7 @@ public class Resultado {
             this.tempoUsado += t.getTempo();
         }
     }
-    
+
     public int getValorTotal() {
         return valorTotal;
     }

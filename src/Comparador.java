@@ -68,7 +68,7 @@ public class Comparador {
             System.out.printf(">> RESULTADO: DP foi melhor por %d pontos (%.1f%%)%n", diff, percent);
         }
 
-        // Optional: Print detailed lists if needed
+        // Opcional: Imprimir listas detalhadas se necessário
         // resG.exibirRelatorio();
         // resDP.exibirRelatorio();
     }
